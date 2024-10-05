@@ -1,8 +1,17 @@
-from sqlmodel import Field, SQLModel
+from models.base import BizBaseModel
+from pydantic import BaseModel
 
-class User(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    id: int |  None = None
+
+class BaseUser(BaseModel):
     username: str
-    password: str
     email: str
-    age: int | None = None
+
+class User(BaseUser, BizBaseModel, table=True):
+    hashed_password: str
+

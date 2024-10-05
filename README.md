@@ -9,8 +9,8 @@ basic example for fastapi project
 │   │   ├── common_response.py 
 │   │   └── exceptions_handler.py # global exception handler
 │   └── v1 # api version 1
-│       ├── records.py
-│       └── users.py
+│       ├── record.py
+│       └── user.py
 ├── common # common tools
 │   ├── assert_util.py # assert util to raise biz exception
 │   ├── biz_exception.py
@@ -26,7 +26,7 @@ basic example for fastapi project
 ├── schemas
 │   └── user.py # user schemas，for api layer
 ├── services # biz logic
-│   └── user_service.py
+│   └── record_service.py
 ├── main.py 
 ├── start.sh # startup script
 

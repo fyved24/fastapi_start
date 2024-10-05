@@ -1,26 +1,18 @@
-# app/services/user_service.py
+from fastapi import  Depends
 
-from sqlmodel import Session
-
-from common import assert_util
-from common.errs import ErrorCode
-from schemas.user import UserCreate, UserUpdate
+from common.token_manager import get_password_hash
 from dal.user_dal import UserDAL
+from models.user import User
+from schemas.req.user import UserCreate
+
 
 class UserService:
-    def __init__(self, session: Session):
-        self.user_dal = UserDAL(session)
+    def __init__(self, user_dal: UserDAL = Depends()):
+        self.user_dal = user_dal
 
-    def create_user(self, user_data: UserCreate):
-        return self.user_dal.create_user(user_data)
-
-    def get_user(self, user_id: int):
-        user = self.user_dal.get_user_by_id(user_id)
-        assert_util.not_none(user, ErrorCode.USER_NOT_FOUND)
+    def create_user(self, base_user: UserCreate) -> User:
+        user = User(**base_user.model_dump(exclude={"password"}))
+        hashed_password = get_password_hash(base_user.password)
+        user.hashed_password = hashed_password
+        self.user_dal.create_user(user)
         return user
-
-    def all_users(self):
-        return self.user_dal.all_users()
-
-    def update_user(self, user_data: UserUpdate):
-        return self.user_dal.update_user(user_data)

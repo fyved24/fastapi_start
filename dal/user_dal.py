@@ -1,57 +1,37 @@
-from common import assert_util
-from common.errs import ErrorCode
+from core.dependencies import get_db
+from dal import utils
 from models.user import User
-from schemas.user import UserCreate, UserUpdate
-from sqlmodel import Field, Session, SQLModel, create_engine, select
+from sqlmodel import Session, select
+from fastapi import Depends
+from schemas.req.user import UserQuery
+
 
 class UserDAL:
-    def __init__(self,  session: Session):
+    def __init__(self,  session: Session = Depends(get_db)):
         self.session = session
 
-    # 创建用户
-    def create_user(self, user_data: UserCreate) -> User:
-        new_user = User(
-            username=user_data.username,
-            email=user_data.email,
-            password=user_data.password,
-            age=user_data.age,
-        )
-        self.session.add(new_user)
+    def create_user(self, user: User):
+        self.session.add(user)
         self.session.commit()
-        self.session.refresh(new_user)
-        return new_user
-    def all_users(self) -> list[User]:
-        statement = select(User)
-        results = self.session.exec(statement)
-        users = results.all()
-        return users
+        return user
 
-   # 获取用户通过 ID
-    def get_user_by_id(self, user_id: int) -> User:
+    def get_user_byid(self, user_id: int) -> User | None:
         statement = select(User).where(User.id == user_id)
         results = self.session.exec(statement)
         user = results.first()
         return user
 
-    # 获取用户通过用户名
-    def get_user_by_username(self, username: str) -> User:
-        statement = select(User).where(User.name == username)
+    def get_user_by_name(self, user_name: str) -> User | None:
+        statement = select(User).where(User.username == user_name)
         results = self.session.exec(statement)
-        user = results.one()
+        user = results.first()
         return user
 
-    def update_user(self, user_data: UserUpdate) -> User:
-        user = self.get_user_by_id(user_data.id)
-        assert_util.not_none(user, ErrorCode.USER_NOT_FOUND)
-        if user_data.username is not None:
-            user.username = user_data.username
-        if user_data.email is not None:
-            user.email = user_data.email
-        if user_data.password is not None:
-            user.password = user_data.password
-        if user_data.age is not None:
-            user.age = user_data.age
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
-        return user
+    def list_users(self, query_params: UserQuery) -> list[User]:
+        statement = select(User)
+        statement = utils.apply_sort(User, statement, query_params.sort_fields)
+        statement = utils.apply_page(statement, query_params.page)
+        print(str(statement))
+        results = self.session.exec(statement)
+        records = results.all()
+        return records
