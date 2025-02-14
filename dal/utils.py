@@ -20,8 +20,8 @@ def apply_sort(schema: Any, statement, sort_fields: list[SortField]):
 def apply_page(statement, page: Page):
     try:
         # 计算偏移量 (offset) 和每页记录数 (limit)
-        offset = (page.page - 1) * page.size
-        limit = page.size
+        offset = (page.currentPage - 1) * page.pageSize
+        limit = page.pageSize
         print(offset)
         print(limit)
         # 应用 offset 和 limit

@@ -4,6 +4,8 @@ from api.common.exceptions_handler import register_exception_handlers
 from core.database import engine
 from sqlmodel import SQLModel
 
+from middleware import register_middleware_handle
+
 SQLModel.metadata.create_all(engine)
 app = FastAPI()
 
@@ -11,3 +13,6 @@ app = FastAPI()
 app.include_router(api_router, prefix="/api")
 # 注册全局异常处理器
 register_exception_handlers(app)
+# 注册中间件
+register_middleware_handle(app)
+

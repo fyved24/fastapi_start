@@ -6,9 +6,12 @@ class SortField(BaseModel):
     order: str = "asc"   #
 
 class Page(BaseModel):
-    page: int = 1 # 页码，默认第1页
-    size: int = 10# 每页大小，默认10条
+    pageSize: int
+    currentPage: int
 
 class BaseQuerySchema(BaseModel):
-    sort_fields: list[SortField] = []  # 排序字段列表
-    page: Page = Page()
+    pass
+
+class BasePagedQuerySchema(BaseQuerySchema):
+    sort_fields: list[SortField] # 排序字段列表
+    page: Page

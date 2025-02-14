@@ -10,7 +10,7 @@ from services.record_service import RecordService
 router = APIRouter()
 
 # 创建一个获取所有记录的路由
-@router.post("/records")
+@router.post("/query")
 async def read_records(
         query_params: RecordQuery,
         current_user: User = Depends(get_current_user),

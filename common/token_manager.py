@@ -5,6 +5,7 @@ from jwt.exceptions import InvalidTokenError
 import jwt
 
 from common.errs import ErrorCode
+from common import usercontext_util
 from core.security import pwd_context, oauth2_scheme
 from common import assert_util, errs
 from dal.user_dal import UserDAL
@@ -46,7 +47,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 async def get_current_user(token: str =  Depends(oauth2_scheme), user_dal: UserDAL = Depends()):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -55,5 +55,10 @@ async def get_current_user(token: str =  Depends(oauth2_scheme), user_dal: UserD
         username = None
     assert_util.not_none(username, ErrorCode.INVALID_CREDENTIALS)
     user = get_user(user_dal, username=username)
-    return user
+    context_token = usercontext_util.set_current_user(user)
+    # 用户上下文
+    try:
+        yield user
+    finally:
+        usercontext_util.reset_current_user(context_token)
 
